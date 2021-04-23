@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD文件读取</title>
+    <link rel="stylesheet" href="css/showdown.css">
+    <style>
+        #area>table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        #area table tr td {
+            margin: 0;
+            padding: 6px;
+            border: 0;
+        }
+        #md-area {
+            width: 100%;
+            height: 600px;
+            font-size: 18px;
+            overflow: hidden;
+            font-weight: bold;
+            outline: none;
+        }
+        #show-area {
+            height: 600px;
+            background-color: #FCF6E5;
+        }
+        .clearfix:before {
+            content: "";
+            display: table;
+        }
+    </style>
+</head>
+<body>
+    <div style="font-size: 20px;height: 30px; text-align: center;color: #009689; font-weight: bold;">Markdown转换为HTML的Demo</div>    
+    
+
+    <div id="area">
+        <input type="file" id="file">
+        <table>
+            <tr>
+                <!-- <td><textarea name="" id="md-area" onkeyup=mdSwitch()></textarea></td> -->
+                <td>
+                    <div id="show-area" class="clearfix"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+<script src="js/showdown.min.js"></script>
+<script>
+    var fileNode = document.getElementById('file')
+    fileNode.addEventListener('change',(e)=>{
+        var type = fileNode.files[0].name.split('.').pop()
+        reader = new FileReader();
+        if (type == 'txt') {
+            reader.onload = (event) =>{
+                document.getElementById('show-area').innerHTML = event.target.result
+            }
+            const file = e.target.files[0]
+            reader.readAsText(file,'gb2312')
+        } else  if(type == 'html'){
+            reader.onload = (event) =>{
+                document.getElementById('show-area').innerHTML = `<XMP>${event.target.result}</XMP>`
+            }
+            const file = e.target.files[0]
+            reader.readAsText(file,'utf-8')
+        } else if (type == 'md'){
+            reader.onload = (event) =>{
+                var mdValue = event.target.result;
+                var converter = new showdown.Converter();
+                var html = converter.makeHtml(mdValue);
+                document.getElementById('show-area').innerHTML = html
+            }
+            const file = e.target.files[0]
+            reader.readAsText(file,'utf-8')
+        }
+            
+    })
+    function mdSwitch() {
+        var mdValue = document.getElementById("md-area").value;
+        var converter = new showdown.Converter();
+        var html = converter.makeHtml(mdValue);
+        document.getElementById("show-area").innerHTML = html;
+    }
+</script>
+</body>
+</html>
