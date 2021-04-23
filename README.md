@@ -1,2 +1,2 @@
 # giao
-一个giaogiao的库
+一个展示本地的TXT、HTML、MD文件的库
