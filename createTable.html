@@ -1,0 +1,206 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>可以全选反选删除的表格</title>
+	<style type="text/css">
+		body,
+		#tesTable {
+			width: 99%;
+		}
+		table {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			font-size: 12px;
+		}
+		tbody {
+			width: 100%;
+		}
+		table,
+		tr,
+		th,
+		td {
+			border: .5px solid #e8e8e8;
+			text-align: center;
+			color: #3d3d3d;
+			font-size: 12px;
+		}
+		th {
+			background-color:#fff;
+			/* width: 200px; */
+		}
+		.oddColor {
+			background-color: #fff;
+		}
+		.evenColor {
+			background-color: #fafafa;
+		}
+		.overColor {
+			background-color: rgba(170, 169, 169, 0.486);
+		}
+	</style>
+	<script type="text/javascript">
+		//定义嵌套数组
+		var datas = [
+			["2021.04.29", '牛肉馆', '逛街', "烧烤"],
+			["2021.04.30", '食宝街', '逛街', "美食"],
+			["2021.05.01", '颐和园', "划船", '达美乐'],
+			["2021.05.02", '动物园', "大骨头", '做饭'],
+			["2021.05.03", '博物馆', "烤鸭", '天安门'],
+			["2021.05.04", '天坛', "卤煮", '天安门'],
+			["2021.05.05", '博物馆', "烤鸭", '天安门'],
+			["2021.05.06", '博物馆', "烤鸭", '天安门']]
+		//动态创建表格
+		function CreateMyTable() {
+			var tblMain = document.getElementById("tblMain");
+			var rowsCount = tblMain.rows.length;
+			var addRow;
+			var addCol;
+			var detailInfos;
+			for (var i = 0; i < datas.length; i++) {
+				addRow = tblMain.insertRow(rowsCount - 1);//控制数据行添加到倒数第二列
+				addCol = addRow.insertCell(-1);
+				addCol.innerHTML = "<input type='checkbox' name='item' onclick='checkOne(this)'/>";
+				addCol.align = "center"; //控制列居中
+				detailInfos = datas[i];//获取数组里的每一行数据
+				for (var j = 0; j < detailInfos.length; j++) {
+					addCol = addRow.insertCell(-1);
+					addCol.innerHTML = detailInfos[j];
+				}
+				addCol = addRow.insertCell(-1);
+				addCol.innerHTML = "<input type='button' id='btnDel" + i + "' value='删除' onclick='btnDel(this)' />";
+				addCol.align = "center"; //控制列居中
+				rowsCount++;
+			}
+			TableColor();
+		}
+		//设置网格间隔色和高亮显示
+		var oldClassName;    //记住行的背景色
+		function TableColor() {
+			var tblMain = document.getElementById("tblMain");
+			var rowNodes = tblMain.rows;
+			for (var i = 1; i < rowNodes.length - 1; i++) { //除去首行和末行
+				if (i % 2 == 0) {
+					rowNodes[i].className = "evenColor";
+				}
+				else {
+					rowNodes[i].className = "oddColor";
+				}
+				rowNodes[i].onmouseover = function () {
+					oldClassName = this.className;
+					this.className = "overColor";
+				}
+				rowNodes[i].onmouseout = function () {
+					this.className = oldClassName;
+				}
+				rowNodes[i].onmousedown = function () {
+					console.log(this)
+					this.className = "evenColor";
+				}
+			}
+		}
+		//复选框全选函数
+		function checkAll() {
+			var currentCheckNode = event.srcElement;
+			var checkAllNodes = document.getElementsByName("all");
+			//把没有点击的全选复选框去除复选
+			for (var i = 0; i < checkAllNodes.length; i++) {
+				if (currentCheckNode != checkAllNodes[i]) {
+					checkAllNodes[i].checked = false;
+				}
+			}
+			var checkItemNodes = document.getElementsByName("item");
+			for (var i = 0; i < checkItemNodes.length; i++) {
+				checkItemNodes[i].checked = currentCheckNode.checked;
+			}
+		}
+		function checkOne(){
+			console.log(this)
+		}
+		//按钮选择函数
+		function btnCheckboxSel(index) {
+			var checkItemNodes = document.getElementsByName("item");
+			for (var i = 0; i < checkItemNodes.length; i++) {
+				if (index == 2) {
+					checkItemNodes[i].checked = !checkItemNodes[i].checked;
+				}
+				else {
+					checkItemNodes[i].checked = index;
+				}
+			}
+		}
+		//每行的删除按钮函数
+		function btnDel(btn) {
+			var tblMain = document.getElementById("tblMain");
+			var delRowNode = btn.parentNode.parentNode;
+			var sMsg = "您是否要删除 姓名为:【" + delRowNode.cells[1].innerText + "】,年龄为:【" +
+				delRowNode.cells[2].innerText + "】,城市为:【" +
+				delRowNode.cells[3].innerText + "】 的数据?";
+			if (window.confirm(sMsg)) {
+				tblMain.tBodies[0].removeChild(delRowNode);
+				TableColor();
+			}
+		}
+		//删除所选项按钮函数
+		function btnDelSelectRow() {
+			var arrDel = new Array();
+			var pos = 0;
+			var itemNodes = document.getElementsByName("item");
+			for (var i = 0; i < itemNodes.length; i++) {
+				if (itemNodes[i].checked) {
+					arrDel[pos] = itemNodes[i].parentNode.parentNode;
+					pos++;
+				}
+			}
+			if (pos <= 0) {
+				return;
+			}
+			if (!window.confirm("是否要删除选择的数据?"))
+				return;
+			var tblMain = document.getElementById("tblMain");
+			for (var i = 0; i < arrDel.length; i++) {
+				tblMain.tBodies[0].removeChild(arrDel[i]);
+			}
+		}
+		window.onload = CreateMyTable;
+	</script>
+</head>
+
+<body>
+	<div id="tesTable">
+		<table id="tblMain" cellspacing="0" cellpadding="10px" align="center">
+			<tbody>
+				<tr>
+					<th><input type="checkbox" name="all" onclick="checkAll()" />全选</th>
+					<th>日期</th>
+					<th>地点</th>
+					<th>游玩</th>
+					<th>美食</th>
+					<th>操作</th>
+				</tr>
+				<tr>
+					<th><input type="checkbox" name="all" onclick="checkAll()" />全选</th>
+					<th colspan="4">
+						<input type="button" value="全选" onclick="btnCheckboxSel(1)" />
+						<input type="button" value="全清" onclick="btnCheckboxSel(0)" />
+						<input type="button" value="反选" onclick="btnCheckboxSel(2)" />
+						<input type="button" value="删除所选项" onclick="btnDelSelectRow()" />
+					</th>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+<script>
+	document.getElementById('btnnn').onclick=function(){
+		console.log(111)
+	}
+	document.getElementsByClassName('btn1')[0].onclick=function(){
+		console.log(22)
+	}
+</script>
+</body>
+
+</html>
